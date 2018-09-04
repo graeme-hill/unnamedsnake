@@ -29,6 +29,7 @@ func emptyGrid(snakeRequest *SnakeRequest) *Grid {
 			grid.Cells = append(grid.Cells, Cell{IsEmpty: true})
 		}
 	}
+	fmt.Println("=======>" + strconv.Itoa(len(grid.Cells)))
 	return &grid
 }
 
@@ -61,7 +62,16 @@ func NewGameState(snakeRequest *SnakeRequest) *GameState {
 	// Mark non-empty cells
 	for _, snake := range snakeRequest.Board.Snakes {
 		for _, part := range snake.Body {
-			grid.Cells[CoordToIndex(part, snakeRequest)].IsEmpty = false
+			if part.X < 0 || part.Y < 0 || part.X >= snakeRequest.Board.Width || part.Y >= snakeRequest.Board.Height {
+				continue
+			}
+			index := CoordToIndex(part, snakeRequest)
+
+			if index >= len(grid.Cells) {
+				fmt.Println("BAD INDEX A: " + strconv.Itoa(index))
+			} else {
+				grid.Cells[index].IsEmpty = false
+			}
 		}
 	}
 
@@ -75,10 +85,14 @@ func NewGameState(snakeRequest *SnakeRequest) *GameState {
 		}
 
 		for _, cell := range Ring(snake.Body[0]) {
+			if cell.X < 0 || cell.Y < 0 || cell.X >= snakeRequest.Board.Width || cell.Y >= snakeRequest.Board.Height {
+				continue
+			}
 			index := CoordToIndex(cell, snakeRequest)
 			if index >= len(grid.Cells) {
-				fmt.Println("BAD INDEX: " + strconv.Itoa(index))
+				fmt.Println("BAD INDEX B: " + strconv.Itoa(index))
 			} else {
+				fmt.Println("->" + strconv.Itoa(index) + "/" + strconv.Itoa(len(grid.Cells)))
 				grid.Cells[index].Dangerous = true
 			}
 		}
@@ -254,7 +268,7 @@ func AStar(start, goal Coord, state *GameState) string {
 		for _, neighbor := range GetNeighbors(current) {
 			neighborIndex := CoordToIndex(neighbor, state.SnakeRequest)
 
-			if !IsCellSafe(neighbor, state) {
+			if !IsCellSafe(neighbor, state) && neighborIndex != goalIndex {
 				continue
 			}
 
@@ -285,4 +299,9 @@ func AStar(start, goal Coord, state *GameState) string {
 	}
 
 	return NOT_FOUND
+}
+
+func DirectionToTail(state *GameState) string {
+	tailIndex := len(state.SnakeRequest.You.Body) - 1
+	return AStar(state.SnakeRequest.You.Body[0], state.SnakeRequest.You.Body[tailIndex], state)
 }

@@ -33,6 +33,15 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	dir := AStar(decoded.You.Body[0], destination, state)
 	nonSuicidal := NonSuicidalDirections(decoded.You.Body[0], state)
 
+	if state.SnakeRequest.You.Health > 50 {
+		tailDir := DirectionToTail(state)
+		fmt.Println("trying tail")
+		if tailDir != NOT_FOUND {
+			fmt.Println("TAIL")
+			dir = tailDir
+		}
+	}
+
 	dirIsOkay := false
 	for _, nonSuidicalDirection := range nonSuicidal {
 		if dir == nonSuidicalDirection {
