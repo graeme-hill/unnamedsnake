@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -24,12 +25,15 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Printf("Bad move request: %v", err)
 	}
-	dump(decoded)
+	//dump(decoded)
 
 	state := NewGameState(&decoded)
-	direction := FindSafeDirection(decoded.You.Body[0], state)
+	//direction := FindSafeDirection(decoded.You.Body[0], state)
+	destination := ClosestFood(decoded.You.Body[0], state)
+	dir := AStar(decoded.You.Body[0], destination, state)
+	fmt.Println(dir)
 	respond(res, MoveResponse{
-		Move: direction,
+		Move: dir,
 	})
 }
 
