@@ -26,8 +26,10 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	}
 	dump(decoded)
 
+	state := NewGameState(&decoded)
+	direction := FindSafeDirection(decoded.You.Body[0], state)
 	respond(res, MoveResponse{
-		Move: "down",
+		Move: direction,
 	})
 }
 
