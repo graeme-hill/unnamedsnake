@@ -31,6 +31,21 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	//direction := FindSafeDirection(decoded.You.Body[0], state)
 	destination := ClosestFood(decoded.You.Body[0], state)
 	dir := AStar(decoded.You.Body[0], destination, state)
+	nonSuicidal := NonSuicidalDirections(decoded.You.Body[0], state)
+
+	dirIsOkay := false
+	for _, nonSuidicalDirection := range nonSuicidal {
+		if dir == nonSuidicalDirection {
+			dirIsOkay = true
+			break
+		}
+	}
+
+	if !dirIsOkay && len(nonSuicidal) > 0 {
+		fmt.Println("DON'T KILL YOURSELF!")
+		dir = nonSuicidal[0]
+	}
+
 	fmt.Println(dir)
 	respond(res, MoveResponse{
 		Move: dir,

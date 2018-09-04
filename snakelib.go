@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strconv"
+)
+
 const BIG_NUMBER = 9999999
 const NOT_FOUND = "nope"
 
@@ -71,7 +76,11 @@ func NewGameState(snakeRequest *SnakeRequest) *GameState {
 
 		for _, cell := range Ring(snake.Body[0]) {
 			index := CoordToIndex(cell, snakeRequest)
-			grid.Cells[index].Dangerous = true
+			if index >= len(grid.Cells) {
+				fmt.Println("BAD INDEX: " + strconv.Itoa(index))
+			} else {
+				grid.Cells[index].Dangerous = true
+			}
 		}
 	}
 
@@ -113,6 +122,23 @@ func FindSafeDirection(start Coord, state *GameState) string {
 		return "down"
 	}
 	return "left"
+}
+
+func NonSuicidalDirections(start Coord, state *GameState) []string {
+	options := []string{}
+	if IsCellSafe(Coord{start.X, start.Y - 1}, state) {
+		options = append(options, "up")
+	}
+	if IsCellSafe(Coord{start.X + 1, start.Y}, state) {
+		options = append(options, "right")
+	}
+	if IsCellSafe(Coord{start.X, start.Y + 1}, state) {
+		options = append(options, "down")
+	}
+	if IsCellSafe(Coord{start.X - 1, start.Y}, state) {
+		options = append(options, "left")
+	}
+	return options
 }
 
 func Abs(x int) int {
